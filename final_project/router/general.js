@@ -63,21 +63,21 @@ public_users.get('/isbn/:isbn',function (req, res) {
   }, (failMessage) => {
     res.status(404).json({message: failMessage})
   }).catch(alert)
-  })
+});
  
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   //Write your code here
-  const author = req.params.author
-  console.log("Author request sent. \nauthor: " + author)
 
-  let booksList = Object.entries(books)
-  
-  let authorBooksList = booksList.filter((pair) => pair[1]['author'] == author)
+  let getBookByAuthor = new Promise((resolve, reject) => {
+    const author = req.params.author
+    console.log("Author request sent. \nauthor: " + author)
 
-  if (authorBooksList.length > 0) {
-    // turn booksByAuthorList to Object
+    let booksList = Object.entries(books)
+    
+    let authorBooksList = booksList.filter((pair) => pair[1]['author'] == author)
+    
     function toObject(targetList) {
       let newObject = {}
       targetList.forEach(pair => {
@@ -85,15 +85,50 @@ public_users.get('/author/:author',function (req, res) {
       });
       return newObject
     }
+    
+    console.log("authorBooksList length: ", authorBooksList.length)
+    if (authorBooksList.length > 0) {
+      resolve(toObject(authorBooksList))
+    } else {
+      reject("No book available by that author.")
+    }
+  })
 
-    let authorBooksObj = toObject(authorBooksList)
-    console.log(authorBooksObj)
-
-    res.send(JSON.stringify(authorBooksObj, null, 4))
-  } else {
-    res.send("No available books by author " + author + ".")
-  }
+  getBookByAuthor.then((authorBooksObj) => {
+      console.log("running resolve")
+      console.log(authorBooksObj)
+      res.send(JSON.stringify(authorBooksObj, null, 4))
+    }, (failMessage) => {
+      console.log("running reject")
+      res.status(404).json({message:failMessage})
+    })
 });
+
+
+  // const author = req.params.author
+  // console.log("Author request sent. \nauthor: " + author)
+
+  // let booksList = Object.entries(books)
+  
+  // let authorBooksList = booksList.filter((pair) => pair[1]['author'] == author)
+
+  // if (authorBooksList.length > 0) {
+  //   // turn booksByAuthorList to Object
+  //   function toObject(targetList) {
+  //     let newObject = {}
+  //     targetList.forEach(pair => {
+  //       newObject[pair[0]] = pair[1]
+  //     });
+  //     return newObject
+  //   }
+
+  //   let authorBooksObj = toObject(authorBooksList)
+  //   console.log(authorBooksObj)
+
+  //   res.send(JSON.stringify(authorBooksObj, null, 4))
+  // } else {
+  //   res.send("No available books by author " + author + ".")
+  // }
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
