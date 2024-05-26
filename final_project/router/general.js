@@ -105,42 +105,17 @@ public_users.get('/author/:author',function (req, res) {
 });
 
 
-  // const author = req.params.author
-  // console.log("Author request sent. \nauthor: " + author)
-
-  // let booksList = Object.entries(books)
-  
-  // let authorBooksList = booksList.filter((pair) => pair[1]['author'] == author)
-
-  // if (authorBooksList.length > 0) {
-  //   // turn booksByAuthorList to Object
-  //   function toObject(targetList) {
-  //     let newObject = {}
-  //     targetList.forEach(pair => {
-  //       newObject[pair[0]] = pair[1]
-  //     });
-  //     return newObject
-  //   }
-
-  //   let authorBooksObj = toObject(authorBooksList)
-  //   console.log(authorBooksObj)
-
-  //   res.send(JSON.stringify(authorBooksObj, null, 4))
-  // } else {
-  //   res.send("No available books by author " + author + ".")
-  // }
-
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   //Write your code here
-  const title = req.params.title.toLowerCase()
-  console.log("Title request sent. \ntitle: " + title)
+  let getBookByTitle = new Promise((resolve, reject) => {
+    const title = req.params.title
+    console.log("title request sent. \ntitle: " + title)
 
-  let booksList = Object.entries(books)
-  
-  let titleBooksList = booksList.filter((pair) => pair[1]['title'].toLowerCase() == title)
-
-  if (titleBooksList.length > 0) {
+    let booksList = Object.entries(books)
+    
+    let titleBooksList = booksList.filter((pair) => pair[1]['title'] == title)
+    
     function toObject(targetList) {
       let newObject = {}
       targetList.forEach(pair => {
@@ -148,14 +123,23 @@ public_users.get('/title/:title',function (req, res) {
       });
       return newObject
     }
+    
+    console.log("titleBooksList length: ", titleBooksList.length)
+    if (titleBooksList.length > 0) {
+      resolve(toObject(titleBooksList))
+    } else {
+      reject("No book available by that title.")
+    }
+  })
 
-    let titleBooksObj = toObject(titleBooksList)
-    console.log(titleBooksObj)
-
-    res.send(JSON.stringify(titleBooksObj, null, 4))
-  } else {
-    res.send("No available books by title " + title + ".")
-  }
+  getBookByTitle.then((titleBooksObj) => {
+      console.log("running resolve")
+      console.log(titleBooksObj)
+      res.send(JSON.stringify(titleBooksObj, null, 4))
+    }, (failMessage) => {
+      console.log("running reject")
+      res.status(404).json({message:failMessage})
+    })
 });
 
 //  Get book review
