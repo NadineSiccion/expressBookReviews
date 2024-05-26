@@ -30,18 +30,41 @@ public_users.post("/register", (req,res) => {
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
   //second add-on
-  res.send(JSON.stringify(books, null, 4))
+  
+  let getBooksPromise = new Promise((resolve, reject) => {
+    console.log('running promise')
+    resolve("promise resolved")
+  })
+
+  getBooksPromise.then((fullfilled) => {
+    console.log('running then')
+    res.send(JSON.stringify(books, null, 4))
+  })
+
+  // res.send(JSON.stringify(books, null, 4))
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
-  const isbn = req.params.isbn
-  if (books[isbn]) {
+
+  let getISBNPromise = new Promise((resolve, reject) => {
+    const isbn = req.params.isbn
+    if (books[isbn]) {
+      resolve(isbn)
+      // res.send(JSON.stringify(books[isbn], null, 4))
+    } else {
+      reject('No available book with that ISBN.')
+      // res.status(404).json({message: "No available book with that ISBN."})
+    }
+  })
+
+  getISBNPromise.then((isbn) => {
     res.send(JSON.stringify(books[isbn], null, 4))
-  } else {
-    res.status(404).json({message: "No available book with that ISBN."})
-  }
- });
+  }, (failMessage) => {
+    res.status(404).json({message: failMessage})
+  }).catch(alert)
+  })
+ 
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
